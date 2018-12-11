@@ -43,6 +43,12 @@ public class AllDice {
             dice.get(i).roll();
             //dice.get(i).roll(i+1);
         }
+//        dice.get(0).roll(1);
+//        dice.get(1).roll(1);
+//        dice.get(2).roll(2);
+//        dice.get(3).roll(2);
+//        dice.get(4).roll(3);
+//        dice.get(5).roll(3);
     }
 
     int getSpecificValueOfDice(int index) {

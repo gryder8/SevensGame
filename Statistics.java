@@ -3,23 +3,23 @@ package pkg;
 
 import java.text.DecimalFormat;
 
-public class Statistics { //track total rolls, average of rolls, most commonly rolled dice, times pairs were removed
+class Statistics { //track total rolls, average of rolls, most commonly rolled dice, times pairs were removed
 
-    DecimalFormat df = new DecimalFormat("0.0");
+    private DecimalFormat df = new DecimalFormat("0.0");
 
-    public void increaseTotalRolls() {
+    void increaseTotalRolls() {
         this.totalRolls ++;
     }
 
-    public void increaseTotalScore(double increaseScore) {
+    void increaseTotalScore(double increaseScore) {
         this.totalScore += increaseScore;
     }
 
-    public void increaseRemovals() {
+    void increaseRemovals() {
         this.removalCount++;
     }
 
-    public int getRemovalCount(){
+    private int getRemovalCount(){
         return this.removalCount;
     }
 
@@ -42,23 +42,30 @@ public class Statistics { //track total rolls, average of rolls, most commonly r
         return df.format(average);
     }
 
-    public void tallyDice(AllDice gameDice) {
+    void tallyDice(AllDice gameDice) {
         for (int i = 0; i < gameDice.diceInContainer(); i++) {
             diceTallies[gameDice.getSpecificValueOfDice(i)-1]++; //increment that space by 1
         }
     }
 
-    public int returnMostRolledDiceValue(){
+    private String returnMostRolledDiceValue(){
+        StringBuilder output = new StringBuilder();
         int highestIndex = 0;
         for (int i = 0; i<diceTallies.length; i++){
             if (diceTallies[i] > diceTallies[highestIndex]){
                 highestIndex = i;
             }
         }
-        return highestIndex+1;
+        output.append(highestIndex+1); //initialize the StringBuilder as the highest index and compensate for 0 based
+        for (int i = 0; i<diceTallies.length; i++){
+            if (diceTallies[i] == diceTallies[highestIndex] && i != highestIndex){
+                output.append(" & "+(i+1));
+            }
+        }
+        return output.toString();
     }
 
-    public void increasePairsTally (int firstNum) {
+    void increasePairsTally (int firstNum) {
         switch (firstNum) {
             case 1:
                 oneSixTally++;
@@ -105,7 +112,7 @@ public class Statistics { //track total rolls, average of rolls, most commonly r
         }
     }
 
-    public void printFinalStats(){
+    void printFinalStats(){
         System.out.println(); //blank
         PrintWithColor.blue(playerName+"'s average score for a round was "+calculateAverageScore());
         PrintWithColor.green(playerName+"'s most common dice roll was "+returnMostRolledDiceValue());

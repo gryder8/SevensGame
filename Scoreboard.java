@@ -1,6 +1,6 @@
 package pkg;
 
-public class Scoreboard {
+class Scoreboard {
 
     /**
      * In each round player starts with rolling all 6 dice. After the roll player must remove all dice combinations which add up to 7.
@@ -30,11 +30,11 @@ public class Scoreboard {
      * getters and setters
      * @return value
      */
-    public int getTotalScore() {
+    int getTotalScore() {
         return totalScore;
     }
 
-    public int getTempScore() {
+    int getTempScore() {
         return tempScore;
     }
 
