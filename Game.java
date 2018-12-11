@@ -2,7 +2,8 @@ package pkg;
 
 import java.util.Scanner;
 
-public class Game {
+public class Game { //TODO: Increase readability in console; push this version to GitHub
+    //TODO: REMOVE PAUSE?
 
     private AllDice gameDice = new AllDice();
     private Statistics soloStats = new Statistics("Player");
@@ -14,7 +15,7 @@ public class Game {
     private Scoreboard aiScoreboard = new Scoreboard();
     private Statistics activeStats;
     private static GameRules gameRules = new GameRules();
-    private final long END_ROUND_PAUSE = 2600; //in milliseconds
+    private final long END_ROUND_PAUSE = 2400; //in milliseconds
     private boolean isInitial;
     private int rollsAllowed;
 
@@ -22,7 +23,8 @@ public class Game {
         this.isInitial = true;
     }
 
-    private boolean getYesNoFromUserAsChar() {
+    private boolean getYesNoFromUserAsChar(String prompt) {
+        PrintWithColor.brightWhite(prompt);
         boolean done = false;
         int userChoice = 0;
         while (!done) {
@@ -61,8 +63,8 @@ public class Game {
     }
 
     private boolean checkIfUserWantsRules() {
-        PrintWithColor.brightWhite("Would you like to see the rules? (y/n)");
-        return getYesNoFromUserAsChar();
+        //PrintWithColor.brightWhite("Would you like to see the rules? (y/n)");
+        return getYesNoFromUserAsChar("Would you like to see the rules? (y/n)");
     }
 
     private static int getGameModeFromUser() { //only 1 copy
@@ -96,8 +98,8 @@ public class Game {
     }
 
     private boolean askToShowStats() {
-        PrintWithColor.brightYellow("Would you like to see the game stats? (y/n)");
-        return getYesNoFromUserAsChar();
+        //PrintWithColor.brightYellow("Would you like to see the game stats? (y/n)");
+        return getYesNoFromUserAsChar("Would you like to see the game stats? (y/n)");
     }
 
     private void pause(long millis) { //halts execution for the amount of time passed in
@@ -126,12 +128,17 @@ public class Game {
         if (gameDice.diceInContainer() < 1) {
             return false;
         }
-        return aiScoreboard.generateScore(gameDice) < 15;
+        switch (gameDice.diceInContainer()){
+            case 2: return aiScoreboard.generateScore(gameDice) < 6;
+            case 4: return aiScoreboard.generateScore(gameDice) < 12;
+            case 6: return aiScoreboard.generateScore(gameDice) < 18;
+            default: return false;
+        }
     }
 
     private boolean keepRolling() { //get a valid user input and return it [validation mostly handled by getCharFromUser()]
-        PrintWithColor.blue("Would you like to roll again (y/n)?");
-        return getYesNoFromUserAsChar();
+        //PrintWithColor.blue("Would you like to roll again (y/n)?");
+        return getYesNoFromUserAsChar("Would you like to roll again (y/n)?");
     }
 
     private String outputRoll() {
@@ -147,7 +154,7 @@ public class Game {
         for (int i = 0; i < gameDice.diceInContainer(); i++) {
             int storedValue = gameDice.getSpecificValueOfDice(i);
             for (int k = 0; k < gameDice.diceInContainer(); k++) {
-                if (storedValue + gameDice.getSpecificValueOfDice(k) == seven) { //TODO: Test removal thoroughly!!
+                if (storedValue + gameDice.getSpecificValueOfDice(k) == seven) {
                     if (gameDice.getSpecificValueOfDice(i) + gameDice.getSpecificValueOfDice(k) == seven) {
                         removeDiceInOrder(i, k);
                     }
@@ -159,20 +166,20 @@ public class Game {
         }
     }
 
-    private void removeDiceInOrder(int firstChoiceIndex, int secondChoiceIndex) {
-        if (firstChoiceIndex > secondChoiceIndex && gameDice.diceInContainer() > 0) {
-            PrintWithColor.yellow("Removed a " + gameDice.getSpecificValueOfDice(secondChoiceIndex));
-            PrintWithColor.yellow("Removed a " + gameDice.getSpecificValueOfDice(firstChoiceIndex));
-            gameDice.removeDiceNumber(firstChoiceIndex);
-            gameDice.removeDiceNumber(secondChoiceIndex);
+    private void removeDiceInOrder(int firstIndex, int secondIndex) {
+        if (firstIndex > secondIndex && gameDice.diceInContainer() > 0) {
+            PrintWithColor.yellow("Removed a " + gameDice.getSpecificValueOfDice(secondIndex)); //remove the back one first
+            PrintWithColor.yellow("Removed a " + gameDice.getSpecificValueOfDice(firstIndex)); //front index unchanged
+            gameDice.removeDiceNumber(firstIndex);
+            gameDice.removeDiceNumber(secondIndex);
             PrintWithColor.grey("--------------------");
             PrintWithColor.brightGreen(outputCurrentDiceValues());
         } else if (gameDice.diceInContainer() > 0) {
-            PrintWithColor.yellow("Removed a " + gameDice.getSpecificValueOfDice(firstChoiceIndex));
-            PrintWithColor.yellow("Removed a " + gameDice.getSpecificValueOfDice(secondChoiceIndex));
+            PrintWithColor.yellow("Removed a " + gameDice.getSpecificValueOfDice(firstIndex));
+            PrintWithColor.yellow("Removed a " + gameDice.getSpecificValueOfDice(secondIndex));
             PrintWithColor.grey("--------------------");
-            gameDice.removeDiceNumber(secondChoiceIndex);
-            gameDice.removeDiceNumber(firstChoiceIndex);
+            gameDice.removeDiceNumber(secondIndex);
+            gameDice.removeDiceNumber(firstIndex);
             PrintWithColor.brightGreen(outputCurrentDiceValues());
         }
     }
@@ -204,7 +211,6 @@ public class Game {
         gameDice.restore();
         while (rollsRemaining > 0 && rollAgain) {
             gameDice.rollAll();
-            activeStats.increaseTotalRolls();
             activeStats.tallyDice(gameDice);
             rollsRemaining--;
             PrintWithColor.green(outputRoll());
@@ -212,6 +218,7 @@ public class Game {
                 System.out.println("(" + rollsRemaining + " rolls remaining)");
                 autoRemoveSevens();
                 rollAgain = keepRolling();
+                System.out.println();
                 if (rollAgain) {
                     if (isInitial) {
                         rollsAllowed++;
@@ -224,6 +231,7 @@ public class Game {
             }
         }
         PrintWithColor.brightBlue(scoreboard.printfinalScore(gameDice, playerName));//end of while loop
+        activeStats.increaseTotalRolls();
         activeStats.increaseTotalScore(scoreboard.getTempScore());
         if (isInitial) {
             rollsAllowed++;
@@ -236,7 +244,7 @@ public class Game {
                 PrintWithColor.brightYellow("***The game will be played with a maximum of " + rollsAllowed + " rolls.***");
             }
         }
-        pause(END_ROUND_PAUSE);
+        //pause(END_ROUND_PAUSE);
     }
 
     private void aiRound(int currentRound, Statistics currentStats) {
@@ -249,7 +257,6 @@ public class Game {
         gameDice.restore();
         while (rollsRemaining > 0 && rollAgain) {
             gameDice.rollAll();
-            activeStats.increaseTotalRolls();
             activeStats.tallyDice(gameDice);
             rollsRemaining--;
             PrintWithColor.green(outputRoll());
@@ -257,9 +264,12 @@ public class Game {
                 System.out.println("(" + rollsRemaining + " rolls remaining)");
                 autoRemoveSevens();
                 rollAgain = aiKeepRolling();
+                System.out.println();
                 if (rollAgain) {
                     PrintWithColor.yellow("AI rolled again.");
                     autoRemoveSevens();
+                } else {
+                    PrintWithColor.purple("AI ended its turn.");
                 }
             }
             if (rollsRemaining == 0) {
@@ -267,12 +277,12 @@ public class Game {
             }
         }
         PrintWithColor.brightBlue(aiScoreboard.printfinalScore(gameDice, "The AI"));
+        activeStats.increaseTotalRolls();
         activeStats.increaseTotalScore(aiScoreboard.getTempScore());//end of while loop
-        pause(END_ROUND_PAUSE);
+        //pause(END_ROUND_PAUSE);
     }
 
     private void singlePlayerGame(int numRounds, Game newGame) {
-        //isInitial = true;
         for (int currentRound = 0; currentRound < numRounds; currentRound++) {
             newGame.playerRound(player1Scoreboard, currentRound, "You", "", numRounds, soloStats);
         }
